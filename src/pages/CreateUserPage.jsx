@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import { useNavigate, Link } from 'react-router-dom';
 function CreateUserPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleCreateUser = async (event) => {
     event.preventDefault();
     try {
       await axios.post('http://localhost:5000/api/register', { username, password });
       alert('User created successfully');
+      navigate('/login');
       // Redirect to login page or update the state accordingly
     } catch (error) {
       alert('Failed to create user: ' + (error.response?.data || error.message));

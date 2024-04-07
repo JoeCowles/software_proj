@@ -58,6 +58,7 @@ function App() {
           <Route path="/createuserpage" element={<CreateUserPage/>} />
           <Route path="/input" element={<GroceryInputPage />} />
           <Route path="/report" element={<MonthlyReportPage />} />
+          <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess}/>} />
         </Routes>
       </div>
     </Router>
