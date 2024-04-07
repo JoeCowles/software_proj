@@ -121,10 +121,10 @@ app.post('/api/createOrder', async (req, res) => {
   }
 });
 
-// Add route to handle GET requests for retrieving items by month and year
-app.get('/api/getItemsByMonthYear/:year/:month', async (req, res) => {
+// Add route to handle GET requests for retrieving items by month, year, and username
+app.get('/api/getItemsByUsername/:year/:month/:username', async (req, res) => {
   try {
-    const { year, month } = req.params;
+    const { year, month, username } = req.params;
 
     // Parse month and year to integers
     const targetMonth = parseInt(month);
@@ -135,11 +135,19 @@ app.get('/api/getItemsByMonthYear/:year/:month', async (req, res) => {
       return res.status(400).send('Invalid month or year');
     }
 
-    // Read all orders
-    const allOrders = await readAllOrders();
+    // Validate username
+    if (!username) {
+      return res.status(400).send('Invalid username');
+    }
+
+    // Create filename based on the username
+    const filename = `${username}.txt`;
+
+    // Read orders from file
+    const orders = await readOrdersByUsername(filename);
 
     // Filter orders for the specified month and year
-    const filteredOrders = allOrders.filter(order => {
+    const filteredOrders = orders.filter(order => {
       const orderDate = new Date(order.date);
       return orderDate.getFullYear() === targetYear && orderDate.getMonth() === (targetMonth - 1); // JavaScript months are 0-based
     });
@@ -164,9 +172,10 @@ app.get('/api/getItemsByMonthYear/:year/:month', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error retrieving items by month and year');
+    res.status(500).send('Error retrieving items by month, year, and username');
   }
 });
+
 
 
 async function readAllOrders() {
