@@ -129,6 +129,9 @@ app.get('/api/getItemsByUsername/:year/:month/:username', async (req, res) => {
     // Parse month and year to integers
     const targetMonth = parseInt(month);
     const targetYear = parseInt(year);
+    
+    // Parse username if needed
+    const parsedUsername = decodeURIComponent(username);
 
     // Validate month and year
     if (isNaN(targetMonth) || isNaN(targetYear) || targetMonth < 1 || targetMonth > 12) {
@@ -136,12 +139,12 @@ app.get('/api/getItemsByUsername/:year/:month/:username', async (req, res) => {
     }
 
     // Validate username
-    if (!username) {
+    if (!parsedUsername) {
       return res.status(400).send('Invalid username');
     }
 
     // Create filename based on the username
-    const filename = `${username}.txt`;
+    const filename = `${parsedUsername}.txt`;
 
     // Read orders from file
     const orders = await readOrdersByUsername(filename);
@@ -177,17 +180,17 @@ app.get('/api/getItemsByUsername/:year/:month/:username', async (req, res) => {
 });
 
 
-
-async function readAllOrders() {
+async function readOrdersByUsername(filename) {
   try {
-    const data = await fs.promises.readFile('orders.json', 'utf8');
+    const data = await fs.promises.readFile(filename, 'utf8');
     const orders = JSON.parse(data);
     return orders;
   } catch (error) {
     console.error(error);
     return []; // Return an empty array if there's an error reading or parsing the file
   }
-}
+};
+
 
 
 
