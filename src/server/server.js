@@ -89,5 +89,98 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Add route to handle POST requests for creating orders
+app.post('/api/createOrder', async (req, res) => {
+  try {
+    const { username, itemName, price, date } = req.body;
+
+    // Validate if required fields are provided
+    if (!username || !itemName || !price || !date) {
+      return res.status(400).send('Incomplete order data');
+    }
+
+    // Create a filename based on the username
+    const filename = `${username}.txt`;
+    const orderData = `${itemName}, ${price}, ${date}\n`;
+
+    // Check if file exists
+    const fileExists = fs.existsSync(filename);
+
+    if (!fileExists) {
+      // If file doesn't exist, create a new file and write the order data
+      await fs.promises.writeFile(filename, orderData, 'utf8');
+    } else {
+      // If file exists, append the order data to the existing file
+      await fs.promises.appendFile(filename, orderData, 'utf8');
+    }
+
+    res.status(201).send('Order created successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error creating order');
+  }
+});
+
+// Add route to handle GET requests for retrieving items by month and year
+app.get('/api/getItemsByMonthYear/:year/:month', async (req, res) => {
+  try {
+    const { year, month } = req.params;
+
+    // Parse month and year to integers
+    const targetMonth = parseInt(month);
+    const targetYear = parseInt(year);
+
+    // Validate month and year
+    if (isNaN(targetMonth) || isNaN(targetYear) || targetMonth < 1 || targetMonth > 12) {
+      return res.status(400).send('Invalid month or year');
+    }
+
+    // Read all orders
+    const allOrders = await readAllOrders();
+
+    // Filter orders for the specified month and year
+    const filteredOrders = allOrders.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate.getFullYear() === targetYear && orderDate.getMonth() === (targetMonth - 1); // JavaScript months are 0-based
+    });
+
+    // Calculate the sum of prices for each item
+    const itemSumMap = new Map();
+    filteredOrders.forEach(order => {
+      const { itemName, price } = order;
+      if (itemSumMap.has(itemName)) {
+        itemSumMap.set(itemName, itemSumMap.get(itemName) + price);
+      } else {
+        itemSumMap.set(itemName, price);
+      }
+    });
+
+    // Convert itemSumMap to an array of objects for response
+    const result = Array.from(itemSumMap.entries()).map(([itemName, totalPrice]) => ({
+      itemName,
+      totalPrice
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error retrieving items by month and year');
+  }
+});
+
+
+async function readAllOrders() {
+  try {
+    const data = await fs.promises.readFile('orders.json', 'utf8');
+    const orders = JSON.parse(data);
+    return orders;
+  } catch (error) {
+    console.error(error);
+    return []; // Return an empty array if there's an error reading or parsing the file
+  }
+}
+
+
+
 // Start the server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
