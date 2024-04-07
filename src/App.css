@@ -1,38 +1,108 @@
-.App {
-  text-align: center;
+/* Assuming the image has a minimalist design with a muted color palette */
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: #f4f4f4; /* A light grey background */
+  color: #333; /* A dark grey for text for good contrast */
+  margin: 0;
+  padding: 20px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+nav {
+  background-color: #fff; /* White background for the nav bar */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* A subtle shadow for depth */
+  padding: 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+nav ul {
+  list-style: none;
+  padding: 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  justify-content: space-around;
+  margin: 0;
+}
+
+nav a {
+  text-decoration: none;
+  color: #333; /* Matching the text color */
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #007bff; /* A bright color for hover states */
+}
+
+h2 {
+  color: #007bff; /* A bright color for headings, taken from the cart logo */
+}
+
+/* Style for the forms and report */
+form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 20px auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+form div {
+  margin-bottom: 10px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="date"],
+form input[type="month"],
+form button {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd; /* A light border for the inputs */
+  border-radius: 4px;
+  box-sizing: border-box; /* To ensure padding doesn't increase the width */
+}
+
+form button {
+  background-color: #28a745; /* A green color for submit buttons */
   color: white;
+  border: none;
+  margin-top: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+form button:hover {
+  background-color: #218838;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Style for the report list */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background-color: #fff;
+  padding: 10px;
+  border-bottom: 1px solid #ddd; /* A subtle border for list items */
+}
+
+h4 {
+  text-align: right;
+  margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  nav ul {
+    flex-direction: column;
   }
-  to {
-    transform: rotate(360deg);
+
+  form, .report {
+    width: 90%;
+    margin: 20px auto;
   }
 }
