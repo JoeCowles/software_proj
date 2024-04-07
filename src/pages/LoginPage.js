@@ -12,6 +12,7 @@ function LoginPage({ onLoginSuccess }) {
     try {
       const response = await axios.post('http://localhost:5000/api/login', { username, password });
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('username', username); // Save the username
       alert('Login successful');
       onLoginSuccess();
       navigate('/report'); // Redirect to the report page after successful login
@@ -19,6 +20,7 @@ function LoginPage({ onLoginSuccess }) {
       alert('Login failed: ' + (error.response?.data || error.message));
     }
   };
+  
   
   return (
     <div>
