@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-function LoginPage() {
+function LoginPage({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate(); // Get the navigate function
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -11,13 +13,13 @@ function LoginPage() {
       const response = await axios.post('http://localhost:5000/api/login', { username, password });
       localStorage.setItem('token', response.data.token);
       alert('Login successful');
-      // Redirect to another page or update the state accordingly
+      onLoginSuccess(); // Call the callback function to update the app state
+      navigate('/report'); // Redirect to the report page
     } catch (error) {
       alert('Login failed: ' + (error.response?.data || error.message));
     }
   };
   
-
   return (
     <div>
       <h2>Login</h2>
