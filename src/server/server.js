@@ -6,9 +6,15 @@ const fs = require('fs');
 const { promisify } = require('util');
 const { createObjectCsvWriter } = require('csv-writer');
 const csv = require('csv-parser');
+const { log } = require('console');
 
 const app = express();
 const PORT = 5000;
+
+
+const cors = require('cors');
+app.use(cors());
+
 
 // Promisify the readFile function to use async/await
 const readFileAsync = promisify(fs.readFile);
@@ -27,18 +33,21 @@ const csvWriter = createObjectCsvWriter({
 
 // Register route
 app.post('/api/register', async (req, res) => {
+  log("registering user");
   try {
     const { username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const t_username = username.trim();
+    const t_password = password.trim();
+    const hashedPassword = await bcrypt.hash(t_password, 10);
 
     // Check if the user already exists
     const users = await getUsers();
-    if (users.some(user => user.username === username)) {
+    if (users.some(user => user.USERNAME === t_username)) {
       return res.status(400).send('User already exists');
     }
 
     // Write the new user to the CSV
-    await csvWriter.writeRecords([{ username, password: hashedPassword }]);
+    await csvWriter.writeRecords([{username, password: hashedPassword }]);
     res.status(201).send('User registered successfully');
   } catch (error) {
     console.error(error);
@@ -49,20 +58,22 @@ app.post('/api/register', async (req, res) => {
 // Login route
 app.post('/api/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const {username, password } = req.body;
+    const t_username = username.trim();
+    const t_password = password.trim();
     const users = await getUsers();
-    const user = users.find(user => user.username === username);
+    const user = users.find(user => user.username === t_username);
 
     if (!user) {
-      return res.status(401).send('Invalid username or password');
+      return res.status(401).send('Invalid username');
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(t_password, user.password);
     if (!validPassword) {
       return res.status(401).send('Invalid username or password');
     }
 
-    const token = jwt.sign({ username }, 'secret_key'); // Use username instead of MongoDB's _id
+    const token = jwt.sign({ t_username }, 'secret_key'); // Use username instead of MongoDB's _id
     res.json({ token });
   } catch (error) {
     console.error(error);
@@ -79,6 +90,8 @@ async function getUsers() {
       .pipe(csv())
       .on('data', (data) => results.push(data))
       .on('end', () => {
+        log("FOUND RESULT");
+        log(results);
         resolve(results.map(user => ({ username: user.USERNAME, password: user.PASSWORD })));
       })
       .on('error', reject);
