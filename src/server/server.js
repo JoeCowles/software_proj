@@ -21,12 +21,20 @@ db.once('open', () => console.log('Connected to MongoDB'));
 // Middleware
 app.use(bodyParser.json());
 
-// Define User schema and model
+// User schema and model
 const userSchema = new mongoose.Schema({
   username: String,
   password: String,
 });
 const User = mongoose.model('User', userSchema);
+
+// Item schema and model
+const itemSchema = new mongoose.Schema({
+  itemName: String,
+  price: Number,
+  date: Date
+});
+const Item = mongoose.model('Item', itemSchema);
 
 // Register route
 app.post('/api/register', async (req, res) => {
@@ -54,7 +62,7 @@ app.post('/api/login', async (req, res) => {
     if (!validPassword) {
       return res.status(401).send('Invalid username or password');
     }
-    const token = jwt.sign({ userId: user._id }, 'secret_key');
+    const token = jwt.sign({ userId: user._id }, 'secret_key', { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
     console.error(error);
@@ -62,25 +70,60 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Protected route (example)
-app.get('/api/protected', verifyToken, (req, res) => {
-  res.send('Protected route');
-});
-
-// Token verification middleware
-function verifyToken(req, res, next) {
+// Middleware to authenticate requests
+function authenticateToken(req, res, next) {
   const token = req.headers['authorization'];
-  if (!token) {
-    return res.status(401).send('Access denied. No token provided.');
-  }
+  if (!token) return res.status(401).send('Access denied. No token provided.');
+
   jwt.verify(token, 'secret_key', (err, decoded) => {
-    if (err) {
-      return res.status(401).send('Invalid token');
-    }
+    if (err) return res.status(403).send('Invalid token');
     req.userId = decoded.userId;
     next();
   });
 }
+
+// Add item route
+app.post('/api/addItem', authenticateToken, async (req, res) => {
+  try {
+    const { itemName, price, date } = req.body;
+    const newItem = new Item({ itemName, price, date });
+    await newItem.save();
+    res.status(201).send('Item added successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error adding item');
+  }
+});
+
+// Generate report route
+app.get('/api/monthlyReport/:month', authenticateToken, async (req, res) => {
+  try {
+    const month = req.params.month;
+    const startDate = new Date(month);
+    startDate.setUTCDate(1);
+    const endDate = new Date(startDate);
+    endDate.setUTCMonth(startDate.getUTCMonth() + 1);
+
+    const report = await Item.aggregate([
+      {
+        $match: {
+          date: { $gte: startDate, $lt: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$itemName',
+          totalPrice: { $sum: '$price' }
+        }
+      }
+    ]);
+
+    res.json(report);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error generating monthly report');
+  }
+});
 
 // Start the server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
