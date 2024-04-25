@@ -1,3 +1,4 @@
 hello,$2a$10$WvSfdUZkPjJB4X.vSrmcHuadzuuqBs.j3L1k2.aJaIGmE1Af5rDTe
 admin,$2a$10$O4zLgChL.G9poF6Ma0Kqp.HCtePXpYsZbNZgOQmL4D3y.WJ8k.mQC
 test,$2a$10$gZOrHvIBb.0PtdThE7ZDMe4.AzDm7R3lBjCxSejcCSvI5ZSjOu2mm
+joseph,$2a$10$k0iAnFvCjAhQxHjuyf9V3.wV0FZj59cPDow0aHZVsyOkEYSVZHowO

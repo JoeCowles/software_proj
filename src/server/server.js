@@ -182,22 +182,20 @@ app.get('/api/getItemsByUsername/:year/:month/:username', async (req, res) => {
   }
 });
 
-
 async function readOrdersByUsername(filename) {
   try {
     const data = await fs.promises.readFile(filename, 'utf8');
-    const orders = JSON.parse(data);
+    const orders = data.trim().split('\n').map(line => {
+      const [itemName, price, date] = line.split(', ');
+      return { itemName, price: parseFloat(price), date };
+    });
     return orders;
   } catch (error) {
-    //this line is getting run
-    if (error.code === 'ENOENT') {
-      console.error(`File not found: ${filename}`);
-    } else {
-      console.error(`Error reading file ${filename}:`, error);
-    }
-    return []; // Return an empty array if there's an error reading or parsing the file
+    console.error(`Error reading file ${filename}:`, error);
+    return []; // Return an empty array if there's an error reading the file
   }
-};
+}
+
 
 
 

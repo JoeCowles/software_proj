@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function MonthlyReportPage() {
   const [month, setMonth] = useState('');
@@ -6,22 +7,30 @@ function MonthlyReportPage() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    if (month) {
-      const groceryItems = JSON.parse(localStorage.getItem('groceryItems') || '[]');
-      const filteredItems = groceryItems.filter(item => new Date(item.date).getMonth() === new Date(month).getMonth());
-      
-      const itemExpenses = {};
-      filteredItems.forEach(item => {
-        if (itemExpenses[item.item]) {
-          itemExpenses[item.item] += item.price;
-        } else {
-          itemExpenses[item.item] = item.price;
-        }
-      });
+    const fetchItems = async () => {
+      if (!month) return; // Do not proceed if no month is selected
 
-      setReport(Object.entries(itemExpenses));
-      setTotal(Object.values(itemExpenses).reduce((acc, curr) => acc + curr, 0));
-    }
+      const [yearValue, monthValue] = month.split('-');
+      const username = localStorage.getItem('username'); // Ensure the username is stored after login
+      if (!username) {
+        alert('No username found. Please login again.');
+        return;
+      }
+
+      try {
+        // Make a GET request to the server
+        const response = await axios.get(`http://localhost:5000/api/getItemsByUsername/${yearValue}/${parseInt(monthValue, 10)}/${encodeURIComponent(username)}`);
+        const items = response.data;
+
+        setReport(items.map(item => [item.itemName, item.totalPrice]));
+        setTotal(items.reduce((acc, item) => acc + item.totalPrice, 0));
+      } catch (error) {
+        console.error('Failed to fetch items:', error);
+        alert('Failed to retrieve items. Please try again.');
+      }
+    };
+
+    fetchItems();
   }, [month]);
 
   return (
@@ -29,11 +38,11 @@ function MonthlyReportPage() {
       <h2>Monthly Grocery Report</h2>
       <div>
         <label>Select Month: </label>
-        <input type="month" onChange={(e) => setMonth(e.target.value)} />
+        <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
       </div>
       {report.length > 0 && (
         <div>
-          <h3>Grocery Expenses for the month of {new Date(month).toLocaleString('default', { month: 'long' })}:</h3>
+          <h3>Grocery Expenses for the month of {month}:</h3>
           <ul>
             {report.map(([item, price]) => (
               <li key={item}>{item}: ${price.toFixed(2)}</li>
