@@ -186,7 +186,12 @@ async function readOrdersByUsername(filename) {
     const orders = JSON.parse(data);
     return orders;
   } catch (error) {
-    console.error(error);
+    //this line is getting run
+    if (error.code === 'ENOENT') {
+      console.error(`File not found: ${filename}`);
+    } else {
+      console.error(`Error reading file ${filename}:`, error);
+    }
     return []; // Return an empty array if there's an error reading or parsing the file
   }
 };
