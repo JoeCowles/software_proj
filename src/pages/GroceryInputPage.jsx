@@ -1,21 +1,37 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Ensure axios is imported
 
 function GroceryInputPage() {
   const [item, setItem] = useState('');
   const [price, setPrice] = useState('');
   const [date, setDate] = useState('');
+  const [username, setUsername] = useState(''); // Added to capture the username
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Assuming we use localStorage to store the items
-    const groceryItems = JSON.parse(localStorage.getItem('groceryItems') || '[]');
-    groceryItems.push({ item, price: parseFloat(price), date });
-    localStorage.setItem('groceryItems', JSON.stringify(groceryItems));
-    // Reset form
-    setItem('');
-    setPrice('');
-    setDate('');
-    alert('Item added successfully!');
+
+    // Assume the username is stored in local storage upon login
+    const storedUsername = localStorage.getItem('username');
+
+    try {
+      // Send the POST request to the server with the grocery item data
+      await axios.post('http://localhost:5000/api/createOrder', {
+        username: storedUsername, // Use the stored username or some other method to obtain it
+        itemName: item,
+        price: parseFloat(price),
+        date: date
+      });
+
+      alert('Order created successfully!');
+      
+      // Reset form fields
+      setItem('');
+      setPrice('');
+      setDate('');
+    } catch (error) {
+      console.error('Failed to create order:', error.response?.data || error.message);
+      alert('Failed to create order: ' + (error.response?.data || error.message));
+    }
   };
 
   return (
@@ -41,4 +57,3 @@ function GroceryInputPage() {
 }
 
 export default GroceryInputPage;
-

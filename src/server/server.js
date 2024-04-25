@@ -93,6 +93,8 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/createOrder', async (req, res) => {
   try {
     const { username, itemName, price, date } = req.body;
+    
+    log(username);
 
     // Validate if required fields are provided
     if (!username || !itemName || !price || !date) {
@@ -133,6 +135,7 @@ app.get('/api/getItemsByUsername/:year/:month/:username', async (req, res) => {
     // Parse username if needed
     const parsedUsername = decodeURIComponent(username);
 
+    log(parsedUsername, targetMonth, targetYear);
     // Validate month and year
     if (isNaN(targetMonth) || isNaN(targetYear) || targetMonth < 1 || targetMonth > 12) {
       return res.status(400).send('Invalid month or year');
